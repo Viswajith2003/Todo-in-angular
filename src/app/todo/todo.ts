@@ -1,30 +1,138 @@
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  FormsModule,
+  Validators
+} from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { TaskService } from '../services/task.services';
+import { Task } from '../interfaces/task.interface';
 
 @Component({
   selector: 'app-todo',
-  imports: [FormsModule],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule
+  ],
   templateUrl: './todo.html',
+  styleUrl: './todo.css'
 })
-export class Todo {
-  todos = signal<{ text: string; completed: boolean }[]>([]);
-  newTodoText = '';
+export class TodoComponent implements OnInit {
 
-  addTodo() {
-    const text = this.newTodoText.trim();
-    if (text) {
-      this.todos.update(list => [...list, { text, completed: false }]);
-      this.newTodoText = '';
+  taskForm!: FormGroup;
+
+  tasks: Task[] = [];
+
+  // Edit states
+  editingTaskIndex: number | null = null;
+  editingSubTaskIndex: { taskIndex: number; subTaskIndex: number } | null = null;
+  addingSubTaskIndex: number | null = null;
+
+  editTaskValue = '';
+  editSubTaskValue = '';
+  newSubTaskText = '';
+
+  constructor(
+    private fb: FormBuilder,
+    private taskService: TaskService
+  ) {}
+
+  ngOnInit(): void {
+
+    this.taskForm = this.fb.group({
+      task: ['', Validators.required]
+    });
+
+    this.taskService.task$
+      .subscribe(data => {
+        this.tasks = data;
+      });
+
+    this.taskService.getFromLocal();
+  }
+
+  saveTask() {
+
+    if (this.taskForm.invalid) {
+      return;
+    }
+
+    this.taskService.postToLocal({
+      task: this.taskForm.value.task,
+      subTasks: []
+    });
+
+    this.taskForm.reset();
+  }
+
+  // Task actions
+  deleteTask(index: number) {
+    this.taskService.deleteTask(index);
+    this.cancelTaskEdit();
+  }
+
+  startTaskEdit(index: number, val: string) {
+    this.editingTaskIndex = index;
+    this.editTaskValue = val;
+  }
+
+  cancelTaskEdit() {
+    this.editingTaskIndex = null;
+    this.editTaskValue = '';
+  }
+
+  saveTaskEdit(index: number) {
+    const trimmed = this.editTaskValue.trim();
+    if (trimmed) {
+      this.taskService.updateTaskTitle(index, trimmed);
+      this.cancelTaskEdit();
     }
   }
 
-  editTodo(index: number) {
-    this.todos.update(list =>
-      list.map((todo, i) => (i === index ? { ...todo, completed: !todo.completed } : todo))
-    );
+  // Sub-task actions
+  deleteSubTask(taskIndex: number, subTaskIndex: number) {
+    this.taskService.deleteSubTask(taskIndex, subTaskIndex);
+    this.cancelSubTaskEdit();
   }
 
-  removeTodo(index: number) {
-    this.todos.update(list => list.filter((_, i) => i !== index));
+  startSubTaskEdit(taskIndex: number, subTaskIndex: number, val: string) {
+    this.editingSubTaskIndex = { taskIndex, subTaskIndex };
+    this.editSubTaskValue = val;
+  }
+
+  cancelSubTaskEdit() {
+    this.editingSubTaskIndex = null;
+    this.editSubTaskValue = '';
+  }
+
+  saveSubTaskEdit(taskIndex: number, subTaskIndex: number) {
+    const trimmed = this.editSubTaskValue.trim();
+    if (trimmed) {
+      this.taskService.updateSubTaskText(taskIndex, subTaskIndex, trimmed);
+      this.cancelSubTaskEdit();
+    }
+  }
+
+  // Add new sub-task actions
+  startNewSubTask(taskIndex: number) {
+    this.addingSubTaskIndex = taskIndex;
+    this.newSubTaskText = '';
+  }
+
+  cancelNewSubTask() {
+    this.addingSubTaskIndex = null;
+    this.newSubTaskText = '';
+  }
+
+  saveNewSubTask(taskIndex: number) {
+    const trimmed = this.newSubTaskText.trim();
+    if (trimmed) {
+      this.taskService.addSubTask(taskIndex, trimmed);
+      this.cancelNewSubTask();
+    }
   }
 }

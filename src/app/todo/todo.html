@@ -1,18 +1,136 @@
-<div>
-  <h3>Todo List</h3>
-  <div>
-    <input type="text" [(ngModel)]="newTodoText" placeholder="Add a new task" />
-    <button (click)="addTodo()">Add</button>
+<div class="todo-container">
+  <div class="todo-card">
+    <header class="todo-header">
+      <h2>To-Do List</h2>
+     
+    </header>
+
+    <form [formGroup]="taskForm" class="todo-form">
+      <div class="form-group">
+        <label>New Task</label>
+        <div class="input-action-group">
+          <input
+            type="text"
+            formControlName="task"
+            placeholder="Add a new task..."
+            class="form-input"
+          />
+          <button
+            type="button"
+            (click)="saveTask()"
+            class="btn-save"
+            [disabled]="taskForm.invalid"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <hr class="divider" />
+
+    <div class="tasks-section">
+      <h3>Active Tasks</h3>
+
+      @if (tasks.length === 0) {
+        <div class="empty-state">
+          <p>No active tasks. Add one above to get started!</p>
+        </div>
+      } @else {
+        <ul class="task-list">
+          <li *ngFor="let item of tasks; let i = index" class="task-item">
+            <div class="task-content">
+              <!-- Task Title Row -->
+              <div class="task-row">
+                <div class="task-title-container">
+                  <ng-container *ngIf="editingTaskIndex !== i; else editTaskTemplate">
+                    <strong class="task-title">{{ item.task }}</strong>
+                  </ng-container>
+                  <ng-template #editTaskTemplate>
+                    <input
+                      type="text"
+                      [(ngModel)]="editTaskValue"
+                      class="inline-edit-input"
+                      (keyup.enter)="saveTaskEdit(i)"
+                      (keyup.escape)="cancelTaskEdit()"
+                      placeholder="Edit task..."
+                    />
+                  </ng-template>
+                </div>
+
+                <div class="action-buttons">
+                  <ng-container *ngIf="editingTaskIndex !== i; else saveCancelTaskTemplate">
+                    <button (click)="startTaskEdit(i, item.task)" class="btn-icon edit-btn" title="Edit Task Title">✏️</button>
+                    <button (click)="deleteTask(i)" class="btn-icon delete-btn" title="Delete Task">🗑️</button>
+                  </ng-container>
+                  <ng-template #saveCancelTaskTemplate>
+                    <button (click)="saveTaskEdit(i)" class="btn-icon save-btn">✅</button>
+                    <button (click)="cancelTaskEdit()" class="btn-icon cancel-btn">❌</button>
+                  </ng-template>
+                </div>
+              </div>
+
+              <!-- Subtasks List -->
+              <div class="subtasks-container" *ngIf="item.subTasks && item.subTasks.length > 0">
+                <div 
+                  class="subtask-row" 
+                  *ngFor="let sub of item.subTasks; let sIndex = index"
+                >
+                  <div class="subtask-content-container">
+                    <ng-container *ngIf="editingSubTaskIndex?.taskIndex !== i || editingSubTaskIndex?.subTaskIndex !== sIndex; else editSubTaskTemplate">
+                      <span class="task-subtitle">{{ sub }}</span>
+                    </ng-container>
+                    <ng-template #editSubTaskTemplate>
+                      <input
+                        type="text"
+                        [(ngModel)]="editSubTaskValue"
+                        class="inline-edit-input"
+                        (keyup.enter)="saveSubTaskEdit(i, sIndex)"
+                        (keyup.escape)="cancelSubTaskEdit()"
+                        placeholder="Edit sub-task..."
+                      />
+                    </ng-template>
+                  </div>
+
+                  <div class="action-buttons subtask-actions">
+                    <ng-container *ngIf="editingSubTaskIndex?.taskIndex !== i || editingSubTaskIndex?.subTaskIndex !== sIndex; else saveCancelSubTaskTemplate">
+                      <button (click)="startSubTaskEdit(i, sIndex, sub)" class="btn-icon edit-btn" title="Edit Sub-task">✏️</button>
+                      <button (click)="deleteSubTask(i, sIndex)" class="btn-icon delete-btn" title="Delete Sub-task">🗑️</button>
+                    </ng-container>
+                    <ng-template #saveCancelSubTaskTemplate>
+                      <button (click)="saveSubTaskEdit(i, sIndex)" class="btn-icon save-btn">✅</button>
+                      <button (click)="cancelSubTaskEdit()" class="btn-icon cancel-btn">❌</button>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input for new sub-task -->
+              <div class="subtask-row" *ngIf="addingSubTaskIndex === i" style="border-left-color: #38bdf8;">
+                <div class="subtask-content-container">
+                  <input
+                    type="text"
+                    [(ngModel)]="newSubTaskText"
+                    class="inline-edit-input"
+                    (keyup.enter)="saveNewSubTask(i)"
+                    (keyup.escape)="cancelNewSubTask()"
+                    placeholder="New sub-task..."
+                  />
+                </div>
+                <div class="action-buttons">
+                  <button (click)="saveNewSubTask(i)" class="btn-icon save-btn">✅</button>
+                  <button (click)="cancelNewSubTask()" class="btn-icon cancel-btn">❌</button>
+                </div>
+              </div>
+
+              <!-- Add Subtask trigger button -->
+              <div class="add-subtask-container" *ngIf="addingSubTaskIndex !== i">
+                <button (click)="startNewSubTask(i)" class="btn-add-subtask">+ Add Sub-task</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      }
+    </div>
   </div>
-  <ul>
-    @for (todo of todos(); track $index) {
-      <li>
-        <input type="checkbox" [checked]="todo.completed" (change)="editTodo($index)" />
-        <span [style.text-decoration]="todo.completed ? 'line-through' : 'none'">
-          {{ todo.text }}
-        </span>
-        <button (click)="removeTodo($index)">Delete</button>
-      </li>
-    }
-  </ul>
 </div>
