@@ -1,0 +1,42 @@
+<div class="playground-container">
+  <header class="playground-header">
+    <span class="badge">Angular v21.2</span>
+    <h1>Simple Data Binding</h1>
+    <p>A simple showcase of Angular's real-time binding between your component class and the view.</p>
+  </header>
+
+  <div class="example-wrapper">
+    <div class="binding-card card-simple">
+      <div class="card-header">
+        <div class="binding-type">Live Binding Demonstration by {{name}}</div>
+        <h2>Two-Way Data Binding</h2>
+        <div class="syntax-wrapper">
+          <code class="syntax">[(ngModel)]</code> &amp; <code class="syntax" ngNonBindable>{{ message }}</code>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="input-section">
+          <label for="message-input" class="input-label">Type something:</label>
+          <input 
+            id="message-input" 
+            type="text" 
+            [(ngModel)]="message" 
+            class="custom-input" 
+            placeholder="Type your text here..." 
+          />
+        </div>
+        
+        <div class="output-section">
+          <div class="preview-box">
+            <span class="preview-label">Live Output:</span>
+            <p class="preview-text">{{ message || 'Start typing above to see live updates...' }}</p>
+          </div>
+          
+          <button class="btn btn-action" (click)="clearMessage()" [disabled]="!message">
+            Clear Input
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

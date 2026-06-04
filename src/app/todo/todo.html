@@ -1,0 +1,18 @@
+<div>
+  <h3>Todo List</h3>
+  <div>
+    <input type="text" [(ngModel)]="newTodoText" placeholder="Add a new task" />
+    <button (click)="addTodo()">Add</button>
+  </div>
+  <ul>
+    @for (todo of todos(); track $index) {
+      <li>
+        <input type="checkbox" [checked]="todo.completed" (change)="editTodo($index)" />
+        <span [style.text-decoration]="todo.completed ? 'line-through' : 'none'">
+          {{ todo.text }}
+        </span>
+        <button (click)="removeTodo($index)">Delete</button>
+      </li>
+    }
+  </ul>
+</div>
