@@ -316,3 +316,47 @@
     transform: translateY(0);
   }
 }
+
+/* Task Description Display and Edit Layouts */
+.task-description-display {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(11, 15, 25, 0.35);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  line-height: 1.5;
+  width: 100%;
+}
+
+.task-description-display p {
+  margin-bottom: 0.5rem;
+}
+.task-description-display p:last-child {
+  margin-bottom: 0;
+}
+
+.task-description-display ul, 
+.task-description-display ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.edit-task-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #38bdf8;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+

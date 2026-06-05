@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { TaskService } from '../services/task.services';
 import { Task } from '../interfaces/task.interface';
+import { RoosterEditorComponent } from '../rooster-editor/rooster-editor';
 
 @Component({
   selector: 'app-todo',
@@ -16,7 +17,8 @@ import { Task } from '../interfaces/task.interface';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    RoosterEditorComponent
   ],
   templateUrl: './todo.html',
   styleUrl: './todo.css'
@@ -33,6 +35,7 @@ export class TodoComponent implements OnInit {
   addingSubTaskIndex: number | null = null;
 
   editTaskValue = '';
+  editDescriptionValue = '';
   editSubTaskValue = '';
   newSubTaskText = '';
 
@@ -44,7 +47,8 @@ export class TodoComponent implements OnInit {
   ngOnInit(): void {
 
     this.taskForm = this.fb.group({
-      task: ['', Validators.required]
+      task: ['', Validators.required],
+      description: ['']
     });
 
     this.taskService.task$
@@ -63,6 +67,7 @@ export class TodoComponent implements OnInit {
 
     this.taskService.postToLocal({
       task: this.taskForm.value.task,
+      description: this.taskForm.value.description || '',
       subTasks: []
     });
 
@@ -75,23 +80,27 @@ export class TodoComponent implements OnInit {
     this.cancelTaskEdit();
   }
 
-  startTaskEdit(index: number, val: string) {
+  startTaskEdit(index: number, val: string, description: string = '') {
     this.editingTaskIndex = index;
     this.editTaskValue = val;
+    this.editDescriptionValue = description;
   }
 
   cancelTaskEdit() {
     this.editingTaskIndex = null;
     this.editTaskValue = '';
+    this.editDescriptionValue = '';
   }
 
   saveTaskEdit(index: number) {
     const trimmed = this.editTaskValue.trim();
     if (trimmed) {
       this.taskService.updateTaskTitle(index, trimmed);
+      this.taskService.updateTaskDescription(index, this.editDescriptionValue);
       this.cancelTaskEdit();
     }
   }
+
 
   // Sub-task actions
   deleteSubTask(taskIndex: number, subTaskIndex: number) {

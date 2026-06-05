@@ -37,6 +37,15 @@ export class TaskService {
     }
   }
 
+  updateTaskDescription(index: number, description: string) {
+    const existingData = this.getTasks();
+    if (existingData[index]) {
+      existingData[index].description = description;
+      this.saveAndNotify(existingData);
+    }
+  }
+
+
   addSubTask(taskIndex: number, subTaskText: string) {
     const existingData = this.getTasks();
     if (existingData[taskIndex]) {

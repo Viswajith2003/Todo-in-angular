@@ -7,23 +7,30 @@
 
     <form [formGroup]="taskForm" class="todo-form">
       <div class="form-group">
-        <label>New Task</label>
-        <div class="input-action-group">
-          <input
-            type="text"
-            formControlName="task"
-            placeholder="Add a new task..."
-            class="form-input"
-          />
-          <button
-            type="button"
-            (click)="saveTask()"
-            class="btn-save"
-            [disabled]="taskForm.invalid"
-          >
-            Add
-          </button>
-        </div>
+        <label class="form-label">Task Title</label>
+        <input
+          type="text"
+          formControlName="task"
+          placeholder="What needs to be done?"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <label class="form-label">Description (Rich Text)</label>
+        <app-rooster-editor
+          formControlName="description"
+          placeholder="Add details, links, formatting..."
+        ></app-rooster-editor>
+      </div>
+      <div class="form-actions" style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
+        <button
+          type="button"
+          (click)="saveTask()"
+          class="btn-save"
+          [disabled]="taskForm.invalid"
+        >
+          Create Task
+        </button>
       </div>
     </form>
 
@@ -40,27 +47,39 @@
         <ul class="task-list">
           <li *ngFor="let item of tasks; let i = index" class="task-item">
             <div class="task-content">
-              <!-- Task Title Row -->
+              <!-- Task Title & Description Row -->
               <div class="task-row">
                 <div class="task-title-container">
                   <ng-container *ngIf="editingTaskIndex !== i; else editTaskTemplate">
                     <strong class="task-title">{{ item.task }}</strong>
+                    <div 
+                      *ngIf="item.description" 
+                      class="task-description-display" 
+                      [innerHTML]="item.description"
+                    ></div>
                   </ng-container>
                   <ng-template #editTaskTemplate>
-                    <input
-                      type="text"
-                      [(ngModel)]="editTaskValue"
-                      class="inline-edit-input"
-                      (keyup.enter)="saveTaskEdit(i)"
-                      (keyup.escape)="cancelTaskEdit()"
-                      placeholder="Edit task..."
-                    />
+                    <div class="edit-task-fields">
+                      <input
+                        type="text"
+                        [(ngModel)]="editTaskValue"
+                        class="inline-edit-input"
+                        placeholder="Edit task title..."
+                      />
+                      <div class="edit-description-container" style="margin-top: 0.75rem; width: 100%;">
+                        <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">Description</label>
+                        <app-rooster-editor 
+                          [(ngModel)]="editDescriptionValue"
+                          placeholder="Edit description..."
+                        ></app-rooster-editor>
+                      </div>
+                    </div>
                   </ng-template>
                 </div>
 
                 <div class="action-buttons">
                   <ng-container *ngIf="editingTaskIndex !== i; else saveCancelTaskTemplate">
-                    <button (click)="startTaskEdit(i, item.task)" class="btn-icon edit-btn" title="Edit Task Title">✏️</button>
+                    <button (click)="startTaskEdit(i, item.task, item.description)" class="btn-icon edit-btn" title="Edit Task">✏️</button>
                     <button (click)="deleteTask(i)" class="btn-icon delete-btn" title="Delete Task">🗑️</button>
                   </ng-container>
                   <ng-template #saveCancelTaskTemplate>

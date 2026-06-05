@@ -1,0 +1,144 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.rooster-editor-wrapper {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rooster-editor-wrapper:focus-within {
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 15px rgba(6, 182, 212, 0.15);
+}
+
+/* Toolbar Styling */
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: rgba(11, 15, 25, 0.4);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--border-color);
+  margin: 0 0.25rem;
+}
+
+.toolbar-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.45rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.toolbar-btn:active {
+  transform: scale(0.95);
+}
+
+.toolbar-btn.text-cyan {
+  color: var(--accent-cyan);
+}
+
+.toolbar-btn.text-purple {
+  color: var(--accent-purple);
+}
+
+/* Editor Container */
+.editor-container-outer {
+  position: relative;
+  width: 100%;
+}
+
+.rooster-editor-body {
+  min-height: 180px;
+  max-height: 450px;
+  overflow-y: auto;
+  padding: 1rem;
+  color: var(--text-primary) !important;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+  font-size: 0.975rem;
+  line-height: 1.6;
+  outline: none;
+  background-color: rgba(11, 15, 25, 0.5) !important;
+}
+
+/* Placeholder Implementation */
+.rooster-editor-body:empty::before {
+  content: attr(placeholder);
+  color: var(--text-secondary);
+  opacity: 0.6;
+  pointer-events: none;
+  display: block;
+}
+
+/* Editor internal styles (lists, paragraphs, etc) */
+.rooster-editor-body p {
+  margin-bottom: 0.75rem;
+}
+
+.rooster-editor-body p:last-child {
+  margin-bottom: 0;
+}
+
+.rooster-editor-body ul, 
+.rooster-editor-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rooster-editor-body h1,
+.rooster-editor-body h2,
+.rooster-editor-body h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.rooster-editor-body h1 { font-size: 1.5rem; }
+.rooster-editor-body h2 { font-size: 1.3rem; }
+.rooster-editor-body h3 { font-size: 1.15rem; }
+
+/* Custom Scrollbar for Editor */
+.rooster-editor-body::-webkit-scrollbar {
+  width: 6px;
+}
+.rooster-editor-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.rooster-editor-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+.rooster-editor-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
