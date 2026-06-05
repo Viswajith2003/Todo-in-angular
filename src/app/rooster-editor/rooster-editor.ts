@@ -12,7 +12,8 @@ import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR,
   FormControl,
-  ReactiveFormsModule
+  ReactiveFormsModule,
+  FormsModule
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { EditorAdapter } from 'roosterjs-editor-adapter';
@@ -24,13 +25,16 @@ import {
   toggleBullet,
   toggleNumbering,
   setAlignment,
-  clearFormat
+  clearFormat,
+  insertImage,
+  insertTable,
+  editTable
 } from 'roosterjs';
 
 @Component({
   selector: 'app-rooster-editor',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './rooster-editor.html',
   styleUrl: './rooster-editor.css',
   providers: [
@@ -45,7 +49,139 @@ export class RoosterEditorComponent implements ControlValueAccessor, OnInit, Aft
   @Input() control?: FormControl;
   @Input() placeholder = 'Type your content here...';
 
+  // Modal states
+  showModal = false;
+  modalType: 'image' | 'video' | 'table' = 'image';
+  modalTitle = '';
+  modalInputLabel = '';
+  modalInputValue = '';
+  modalRows = 3;
+  modalCols = 3;
+
+  // Image upload states
+  imageSourceType: 'url' | 'upload' = 'url';
+  selectedFileName = '';
+  selectedFileBase64 = '';
+
+  // Video upload states
+  videoSourceType: 'url' | 'upload' = 'url';
+  selectedVideoName = '';
+  selectedVideoBase64 = '';
+
   @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef<HTMLDivElement>;
+
+  openImageModal() {
+    this.modalType = 'image';
+    this.modalTitle = 'Insert Image';
+    this.modalInputLabel = 'Image Source URL';
+    this.modalInputValue = '';
+    this.imageSourceType = 'url';
+    this.selectedFileName = '';
+    this.selectedFileBase64 = '';
+    this.showModal = true;
+  }
+
+  openVideoModal() {
+    this.modalType = 'video';
+    this.modalTitle = 'Insert Video';
+    this.modalInputLabel = 'Video Source URL';
+    this.modalInputValue = '';
+    this.videoSourceType = 'url';
+    this.selectedVideoName = '';
+    this.selectedVideoBase64 = '';
+    this.showModal = true;
+  }
+
+  openTableModal() {
+    this.modalType = 'table';
+    this.modalTitle = 'Insert Table';
+    this.modalRows = 3;
+    this.modalCols = 3;
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.selectedFileName = '';
+    this.selectedFileBase64 = '';
+    this.selectedVideoName = '';
+    this.selectedVideoBase64 = '';
+  }
+
+  onImageFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedFileName = file.name;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.selectedFileBase64 = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onVideoFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedVideoName = file.name;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.selectedVideoBase64 = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  confirmModal() {
+    if (!this.editor) return;
+
+    if (this.modalType === 'image') {
+      if (this.imageSourceType === 'url') {
+        const url = this.modalInputValue.trim();
+        if (url) {
+          insertImage(this.editor, url);
+        }
+      } else if (this.imageSourceType === 'upload') {
+        if (this.selectedFileBase64) {
+          insertImage(this.editor, this.selectedFileBase64);
+        }
+      }
+    } else if (this.modalType === 'video') {
+      let src = '';
+      if (this.videoSourceType === 'url') {
+        src = this.modalInputValue.trim();
+      } else if (this.videoSourceType === 'upload') {
+        src = this.selectedVideoBase64;
+      }
+
+      if (src) {
+        const videoNode = document.createElement('video');
+        videoNode.src = src;
+        videoNode.controls = true;
+        videoNode.style.maxWidth = '100%';
+        videoNode.style.display = 'block';
+        videoNode.style.margin = '0.5rem 0';
+        videoNode.style.borderRadius = '8px';
+        this.editor.insertNode(videoNode);
+      }
+    } else if (this.modalType === 'table') {
+      const r = Math.max(1, Math.min(20, this.modalRows));
+      const c = Math.max(1, Math.min(20, this.modalCols));
+      insertTable(this.editor, c, r);
+    }
+
+    this.closeModal();
+  }
+
+  execTableOp(op: string) {
+    if (this.editor) {
+      editTable(this.editor, op as any);
+    }
+  }
 
   private editor?: EditorAdapter;
   private onChange: (value: string) => void = () => {};
@@ -132,7 +268,7 @@ export class RoosterEditorComponent implements ControlValueAccessor, OnInit, Aft
     }
   }
 
-  // Formatting operations
+
   execBold() {
     if (this.editor) {
       toggleBold(this.editor);
